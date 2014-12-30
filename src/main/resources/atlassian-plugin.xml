@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${project.groupId}.${project.artifactId}"
+	name="${project.name}" plugins-version="2">
+	<plugin-info>
+		<description>${project.description}</description>
+		<version>${project.version}</version>
+		<vendor name="${project.organization.name}" url="${project.organization.url}" />
+		<param name="plugin-icon">images/pluginIcon.png</param>
+		<param name="plugin-logo">images/pluginLogo.png</param>
+	</plugin-info>
+	<!-- add our i18n resource -->
+	<resource type="i18n" name="i18n" location="PageAccess" />
+	<!-- add our web resources -->
+	<web-resource key="PageAccess-resources" name="PageAccess Web Resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+		<resource type="download" name="PageAccess.css" location="/css/PageAccess.css" />
+		<resource type="download" name="PageAccess.js" location="/js/PageAccess.js" />
+		<resource type="download" name="images/" location="/images" />
+		<context>PageAccess</context>
+	</web-resource>
+	<!-- publish our component -->
+	<component key="myPluginComponent"
+		class="com.winagile.statistics.MyPluginComponentImpl" public="true">
+		<interface>com.winagile.statistics.MyPluginComponent</interface>
+	</component>
+	<!-- import from the product container -->
+	<component-import key="applicationProperties"
+		interface="com.atlassian.sal.api.ApplicationProperties" />
+	<rest name="Add Info" i18n-name-key="add-info.name" key="add-info"
+		path="/addinfo" version="1.0">
+		<description key="add-info.description">The Add Info Plugin</description>
+	</rest>
+	<web-resource key="pageAccess-resources-pageinfo"
+		name="pageAccess-resources-pageinfo Web Resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+		<resource name="PageAccess.js" type="download" location="/js/PageAccess.js" />
+		<context>atl.general</context>
+	</web-resource>
+
+	<ao key="ao-module">
+		<description>The module configuring the Active Objects service used by
+			this plugin
+		</description>
+		<entity>com.winagile.activeObject.SaveAccess</entity>
+	</ao>
+	<component-import key="ao" name="Active Objects service"
+		interface="com.atlassian.activeobjects.external.ActiveObjects">
+		<description>Component to access Active Objects functionality from the
+			plugin
+		</description>
+	</component-import>
+	<component key="tx-processor" name="Transactional Annotation Processor"
+		class="com.atlassian.activeobjects.external.TransactionalAnnotationProcessor">
+		<decription>Processes @Transactional annotations.</decription>
+	</component>
+
+	<component key="SaveAccess-service" name="SaveAccess Service"
+		class="com.winagile.activeObject.AccessSaveServiceImpl" />
+</atlassian-plugin>
