@@ -1,10 +1,6 @@
 package com.winagile.statistics.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -12,37 +8,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.atlassian.confluence.pages.Page;
-import com.atlassian.confluence.pages.PageManager;
+import bucket.core.actions.PaginationSupport;
+
 import com.atlassian.confluence.renderer.radeox.macros.MacroUtils;
-import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.confluence.util.velocity.VelocityUtils;
-import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.websudo.WebSudoManager;
 import com.atlassian.sal.api.websudo.WebSudoSessionException;
-import com.atlassian.user.User;
-import com.ibm.icu.text.SimpleDateFormat;
-import com.winagile.activeObject.AccessSaveService;
-import com.winagile.activeObject.SaveAccess;
+import com.winagile.statistics.pageAccessUtil;
 
 public class PageAccessState extends HttpServlet {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final AccessSaveService as;
-	private final PageManager pm;
-	private UserAccessor ua;
-	private List<Map<String, String>> realList = new ArrayList<Map<String, String>>();
-	private Map<String, String> pageInfoAccessDate = new HashMap<String, String>();
-	private WebSudoManager webSudoManager;
 
-	public PageAccessState(AccessSaveService as, PageManager pm,
-			UserAccessor ua, WebSudoManager webSudoManager) {
-		this.as = as;
-		this.pm = pm;
-		this.ua = ua;
+	private WebSudoManager webSudoManager;
+	private final pageAccessUtil pageUtil;
+	private PaginationSupport<Map<String, String>> paginationSupport = new PaginationSupport<Map<String, String>>(
+			pageAccessUtil.COUNT_ON_EACH_PAGE);
+
+	public PageAccessState(WebSudoManager webSudoManager,
+			pageAccessUtil pageUtil) {
 		this.webSudoManager = webSudoManager;
+		this.pageUtil = pageUtil;
 	}
 
 	@Override
@@ -50,12 +38,16 @@ public class PageAccessState extends HttpServlet {
 			throws ServletException, IOException {
 		try {
 			webSudoManager.willExecuteWebSudoRequest(req);
-			List<SaveAccess> asResult = as.all();
-			getRealContext(asResult);
+			pageUtil.getAllRealContext();
 
 			Map<String, Object> context = MacroUtils.defaultVelocityContext();
-			context.put("asResult", realList);
-			context.put("accessDate", pageInfoAccessDate);
+			context.put("asResult", pageUtil.getRealList());
+			context.put("accessDate", pageUtil.getPageInfoAccessDate());
+
+			context.put("pageNumber", 1);
+			context.put("totalPage", pageUtil.getTotalPage());
+			context.put("paginationSupport", paginationSupport);
+
 			resp.setContentType("text/html");
 			resp.getWriter().write(
 					VelocityUtils.getRenderedTemplate(
@@ -82,60 +74,4 @@ public class PageAccessState extends HttpServlet {
 		}
 	}
 
-	private void getRealContext(List<SaveAccess> saR) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		realList = new ArrayList<Map<String, String>>();
-		pageInfoAccessDate = new HashMap<String, String>();
-
-		for (SaveAccess saRI : saR) {
-			if (pageInfoAccessDate.containsKey(saRI.getPageId().toString()
-					+ saRI.getUserKey())) {
-				StringBuffer extraAccessTimeList = new StringBuffer();
-				extraAccessTimeList.append(pageInfoAccessDate.get(saRI
-						.getPageId().toString() + saRI.getUserKey()));
-				extraAccessTimeList.append("<br />");
-				extraAccessTimeList.append(sdf.format(new Date(saRI
-						.getAccessEntity())));
-				pageInfoAccessDate.put(
-						saRI.getPageId().toString() + saRI.getUserKey(),
-						extraAccessTimeList.toString());
-
-			} else {
-				Map<String, String> pageInfo = new HashMap<String, String>();
-				Page accessPage = pm.getPage(saRI.getPageId());
-				User accessUser = ua
-						.getUserByKey(new UserKey(saRI.getUserKey()));
-				if (accessUser != null && accessPage != null) {
-					pageInfo.put("userName", accessUser.getFullName());
-
-					StringBuffer groupNameList = new StringBuffer();
-					if (ua.getGroupNames(accessUser) != null) {
-						for (String groupName : ua.getGroupNames(accessUser)) {
-							groupNameList.append(groupName);
-							groupNameList.append("<br />");
-						}
-					}
-					pageInfo.put("userGroups", groupNameList.append("")
-							.toString());
-
-					pageInfo.put("pageTitle", accessPage.getDisplayTitle());
-					pageInfo.put("pageUrl", accessPage.getUrlPath());
-					pageInfo.put("accessCount",
-							String.valueOf(as.getAccessCount(saRI.getPageId(),
-									saRI.getUserKey())));
-					pageInfo.put("uniqueKey", saRI.getPageId().toString()
-							+ saRI.getUserKey());
-
-					pageInfoAccessDate.put(
-							saRI.getPageId().toString() + saRI.getUserKey(),
-							sdf.format(new Date(saRI.getAccessEntity())));
-					realList.add(pageInfo);
-				} else {
-					continue;
-				}
-			}
-			System.out.println(realList.toString());
-			System.out.println(pageInfoAccessDate.toString());
-		}
-	}
 }

@@ -7,24 +7,34 @@
     $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
   </head>
   <body>
-    <table>
-    	<tr><td>$i18n.getText("PageAccess.section.pageName")</td>
-    		<td>$i18n.getText("PageAccess.section.username")</td>
-    		<td>$i18n.getText("PageAccess.section.accessCount")</td>
-    		<td>$i18n.getText("PageAccess.section.userGroup")</td>
-    		<td>$i18n.getText("PageAccess.section.accessDate")</td>
-    	</tr>
-    	 #foreach($item in $asResult)
-          <tr>
-          	<td><a href="$item.get("pageUrl")" target="_blank">$item.get("pageTitle")</a></td>
-          	<td>$item.get("userName")</td>
-          	<td>$item.get("accessCount")</td>
-          	#set($userGroupsWithHtml = $item.get("userGroups"))
-          	<td>$userGroupsWithHtml</td>
-          	#set($uniqueKeyWithHtml = $accessDate.get($item.get("uniqueKey")))
-          	<td>$uniqueKeyWithHtml</td>
-          </tr>
-		#end
-    </table>
+    #parse("/templates/pageAccessTable.vm")
+    
+    #pagination($paginationSupport)
+			<div class="pagination">
+    			<ul class="pagination">
+        			#set($pageStart = 1)
+                	#set($pageEnd = $totalPage)
+                	#set($range = [$pageStart..$pageEnd])
+        						
+        			## Previous Page
+        			#if($totalPage>1 && $pageNumber!=1)
+        				<li><a class="pageAccess" href="#" clickedPage="$!pageNumber-1">&lt;&lt; $i18n.getText("PageAccess.pagination.previous")</a></li>
+        			#end
+                		
+        			#foreach ($i in $range)
+        				#if($pageNumber == $i)
+        					<li><strong class="pagination-curr">$i</strong></li>
+        				#else
+        					<li><a class="pageAccess" href="#" clickedPage="$!i">$i</a></li>
+        				#end
+        			#end
+        						
+        			## Next Page
+        			#if($totalPage>1 && $pageNumber!=$totalPage)
+        				#set($nextPage=$pageNumber+1)
+        				<li><a class="spaceAttachmentsPage" href="#" clickedPage="$!nextPage">$i18n.getText("PageAccess.pagination.next") &gt;&gt</a></li>
+    				#end
+            	</ul>	
+    		</div>
   </body>
 </html>

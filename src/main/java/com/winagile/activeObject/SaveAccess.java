@@ -16,4 +16,8 @@ public interface SaveAccess extends Entity {
 	Long getAccessEntity();
 
 	void setAccessEntity(Long accessEntity);
+	
+	String getType();
+
+	void setType(String type);
 }

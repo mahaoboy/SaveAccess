@@ -40,13 +40,15 @@
 	</web-resource>
 	<ao key="ao-module">
 		<description>The module configuring the Active Objects service used by
-			this plugin</description>
+			this plugin
+		</description>
 		<entity>com.winagile.activeObject.SaveAccess</entity>
 	</ao>
 	<component-import key="ao" name="Active Objects service"
 		interface="com.atlassian.activeobjects.external.ActiveObjects">
 		<description>Component to access Active Objects functionality from the
-			plugin</description>
+			plugin
+		</description>
 	</component-import>
 	<component key="tx-processor" name="Transactional Annotation Processor"
 		class="com.atlassian.activeobjects.external.TransactionalAnnotationProcessor">
@@ -81,4 +83,6 @@
 
 	<component-import key="webSudoManager"
 		interface="com.atlassian.sal.api.websudo.WebSudoManager" />
+
+	<component key="myPageAccessUtl" class="com.winagile.statistics.pageAccessUtil" />
 </atlassian-plugin>

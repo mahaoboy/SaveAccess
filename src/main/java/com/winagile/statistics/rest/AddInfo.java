@@ -23,13 +23,11 @@ public class AddInfo {
 	private static String FAIL = "failed";
 	private static String NOTLOGINPAGENOTEXIST = "notLoginOrPageNotExist";
 	private AccessSaveService accessSaveService;
-	private UserAccessor ua;
 	private PageManager pm;
 
 	public AddInfo(AccessSaveService accessSaveService, UserAccessor ua,
 			PageManager pm) {
 		this.accessSaveService = accessSaveService;
-		this.ua = ua;
 		this.pm = pm;
 	}
 

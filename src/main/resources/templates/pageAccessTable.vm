@@ -1,0 +1,19 @@
+<table>
+    	<tr><td>$i18n.getText("PageAccess.section.pageName")</td>
+    		<td>$i18n.getText("PageAccess.section.username")</td>
+    		<td>$i18n.getText("PageAccess.section.accessCount")</td>
+    		<td>$i18n.getText("PageAccess.section.userGroup")</td>
+    		<td>$i18n.getText("PageAccess.section.accessDate")</td>
+    	</tr>
+    	 #foreach($item in $asResult)
+          <tr>
+          	<td><a href="$item.get("pageUrl")" target="_blank">$item.get("pageTitle")</a></td>
+          	<td>$item.get("userName")</td>
+          	<td>$item.get("accessCount")</td>
+          	#set($userGroupsWithHtml = $item.get("userGroups"))
+          	<td>$userGroupsWithHtml</td>
+          	#set($uniqueKeyWithHtml = $accessDate.get($item.get("uniqueKey")))
+          	<td>$uniqueKeyWithHtml</td>
+          </tr>
+		#end
+    </table>
