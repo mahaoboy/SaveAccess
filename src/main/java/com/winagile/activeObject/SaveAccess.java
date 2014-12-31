@@ -1,12 +1,7 @@
 package com.winagile.activeObject;
 
-import java.util.Date;
-import java.util.List;
-
 import net.java.ao.Entity;
 import net.java.ao.Preload;
-
-import com.atlassian.sal.api.user.UserKey;
 
 @Preload
 public interface SaveAccess extends Entity {
@@ -14,19 +9,11 @@ public interface SaveAccess extends Entity {
 
 	void setPageId(Long pageId);
 
-	UserKey getUserName();
+	String getUserKey();
 
-	void setUserName(UserKey userName);
+	void setUserKey(String userKey);
 
-	List<Date> getAccessTime();
+	Long getAccessEntity();
 
-	void setAccessTime(List<Date> accessTime);
-
-	Long getAccessCount();
-
-	void setAccessCount(Long accessCcount);
-	
-	Date getLastAccessDate();
-
-	void setLastAccessDate(Date lastAccessDate);
+	void setAccessEntity(Long accessEntity);
 }

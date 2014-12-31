@@ -3,12 +3,12 @@ package com.winagile.activeObject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.java.ao.Query;
+
 import com.atlassian.activeobjects.external.ActiveObjects;
-import com.atlassian.sal.api.user.UserKey;
 
 public class AccessSaveServiceImpl implements AccessSaveService {
 
@@ -19,38 +19,28 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 	}
 
 	@Override
-	public SaveAccess add(Long pageId, UserKey userName) {
-		final SaveAccess[] sa;
-		sa = ao.find(SaveAccess.class, "userName = ? AND pageId = ?", userName,
-				pageId);
-		if (sa.length > 0) {
-			sa[0].setAccessCount(sa[0].getAccessCount() + 1);
-			List<Date> updateTime = sa[0].getAccessTime();
-			Date now = new Date();
-			updateTime.add(now);
-			sa[0].setAccessTime(updateTime);
-			sa[0].setLastAccessDate(now);
-			sa[0].save();
-			return sa[0];
-		} else {
-			final SaveAccess saS = ao.create(SaveAccess.class);
-			saS.setPageId(pageId);
-			saS.setUserName(userName);
-			saS.setAccessCount(1L);
-			List<Date> updateTime = new ArrayList<Date>();
-			Date now = new Date();
-			updateTime.add(now);
-			saS.setAccessTime(updateTime);
-			saS.setLastAccessDate(now);
-			saS.save();
-			return saS;
-		}
+	public SaveAccess add(Long pageId, String userkey) {
+		final SaveAccess saSCount = ao.create(SaveAccess.class);
+		Long now = new Date().getTime();
 
+		saSCount.setPageId(pageId);
+		saSCount.setUserKey(userkey);
+		saSCount.setAccessEntity(now);
+		saSCount.save();
+		return saSCount;
 	}
 
 	@Override
 	public List<SaveAccess> all() {
-		return newArrayList(ao.find(SaveAccess.class));
+		return newArrayList(ao.find(SaveAccess.class, Query.select().order("id DESC")));
+	}
+
+	@Override
+	public int getAccessCount(Long pageId, String userKey) {
+		// TODO Auto-generated method stub
+
+		return ao.count(SaveAccess.class, "page_id = ? AND user_key = ?",
+				pageId, userKey);
 	}
 
 }

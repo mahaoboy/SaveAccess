@@ -8,6 +8,7 @@
 		<vendor name="${project.organization.name}" url="${project.organization.url}" />
 		<param name="plugin-icon">images/pluginIcon.png</param>
 		<param name="plugin-logo">images/pluginLogo.png</param>
+		<param name="configure.url">/plugins/servlet/winagile/pageaccessstate</param>
 	</plugin-info>
 	<!-- add our i18n resource -->
 	<resource type="i18n" name="i18n" location="PageAccess" />
@@ -37,24 +38,47 @@
 		<resource name="PageAccess.js" type="download" location="/js/PageAccess.js" />
 		<context>atl.general</context>
 	</web-resource>
-
 	<ao key="ao-module">
 		<description>The module configuring the Active Objects service used by
-			this plugin
-		</description>
+			this plugin</description>
 		<entity>com.winagile.activeObject.SaveAccess</entity>
 	</ao>
 	<component-import key="ao" name="Active Objects service"
 		interface="com.atlassian.activeobjects.external.ActiveObjects">
 		<description>Component to access Active Objects functionality from the
-			plugin
-		</description>
+			plugin</description>
 	</component-import>
 	<component key="tx-processor" name="Transactional Annotation Processor"
 		class="com.atlassian.activeobjects.external.TransactionalAnnotationProcessor">
 		<decription>Processes @Transactional annotations.</decription>
 	</component>
+	<component key="SaveAccess-service"
+		class="com.winagile.activeObject.AccessSaveServiceImpl" name="SaveAccess Service"
+		public="true">
+		<interface>com.winagile.activeObject.AccessSaveService</interface>
+	</component>
 
-	<component key="SaveAccess-service" name="SaveAccess Service"
-		class="com.winagile.activeObject.AccessSaveServiceImpl" />
+	<web-section key="SaveAccessSection" name="SaveAccessSection Section"
+		location="system.admin" weight="110">
+		<label key="PageAccess.section.name" />
+		<condition
+			class="com.atlassian.confluence.plugin.descriptor.web.conditions.SystemAdministratorCondition" />
+	</web-section>
+	<web-item key="SaveAccessWebItem" name="SaveAccessWebItem WebItem"
+		section="system.admin/SaveAccessSection" weight="1">
+		<label key="PageAccess.section.name" />
+		<link linkId="SaveAccessWebItem">/plugins/servlet/winagile/pageaccessstate</link>
+		<condition
+			class="com.atlassian.confluence.plugin.descriptor.web.conditions.SystemAdministratorCondition" />
+	</web-item>
+
+	<servlet name="Page Access State" i18n-name-key="page-access-state.name"
+		key="page-access-state" class="com.winagile.statistics.servlet.PageAccessState">
+		<description key="page-access-state.description">The Page Access State Plugin
+		</description>
+		<url-pattern>/winagile/pageaccessstate</url-pattern>
+	</servlet>
+
+	<component-import key="webSudoManager"
+		interface="com.atlassian.sal.api.websudo.WebSudoManager" />
 </atlassian-plugin>

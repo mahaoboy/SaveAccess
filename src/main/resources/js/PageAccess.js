@@ -5,13 +5,13 @@ AJS.$(document).ready(
 			function getPageID() {
 				if (checkElement(AJS.$("#main-content"))
 						&& checkElement(AJS.params.pageId)) {
-					alert(AJS.params.pageId);
+					accessRecorde(AJS.params.pageId);
 				}
 			}
-			function getCurrentUserName(key) {
+			function accessRecorde(pageid) {
 				var status;
 				AJS.$.ajax({
-					url : "/rest/editperm/1.0/message/" + key,
+					url : "/rest/addinfo/1.0/message/" + pageid,
 					type : 'get',
 					dataType : 'json',
 					async : false,
