@@ -38,6 +38,16 @@
 		<resource name="PageAccess.js" type="download" location="/js/PageAccess.js" />
 		<context>atl.general</context>
 	</web-resource>
+
+	<web-resource key="pagination-javascript" name="pagination JavaScript">
+		<transformation extension="js">
+			<transformer key="jsI18n" />
+		</transformation>
+		<resource type="download" name="pagination.js" location="/js/pagination.js" />
+		<dependency>confluence.web.resources:ajs</dependency>
+		<dependency>com.atlassian.auiplugin:aui-date-picker</dependency>
+	</web-resource>
+
 	<ao key="ao-module">
 		<description>The module configuring the Active Objects service used by
 			this plugin
@@ -85,4 +95,9 @@
 		interface="com.atlassian.sal.api.websudo.WebSudoManager" />
 
 	<component key="myPageAccessUtl" class="com.winagile.statistics.pageAccessUtil" />
+
+	<component-import key="userManager"
+		interface="com.atlassian.sal.api.user.UserManager" filter="" />
+	<component-import key="loginUriProvider"
+		interface="com.atlassian.sal.api.auth.LoginUriProvider" filter="" />
 </atlassian-plugin>

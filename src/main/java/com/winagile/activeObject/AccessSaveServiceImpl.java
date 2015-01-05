@@ -38,7 +38,7 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 	@Override
 	public List<SaveAccess> all() {
 		return newArrayList(ao.find(SaveAccess.class,
-				Query.select().order("id DESC")));
+				Query.select().where(TYPE + " = ?", LASTTAG).order("id DESC")));
 	}
 
 	@Override
@@ -62,8 +62,11 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 
 	@Override
 	public List<SaveAccess> getAccessByFilter(Long pageId, String userkey) {
-		return newArrayList(ao.find(SaveAccess.class,
-				"page_id = ? AND user_key = ?", pageId, userkey));
+		return newArrayList(ao.find(
+				SaveAccess.class,
+				Query.select()
+						.where("page_id = ? AND user_key = ?", pageId, userkey)
+						.order("id DESC")));
 	}
 
 	private void setLastTagToOther(Long pageId, String userkey) {
@@ -76,6 +79,68 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 				saI.save();
 			}
 		}
+	}
+
+	@Override
+	public List<SaveAccess> filterWithDate(Long startDate, Long endDate) {
+		return newArrayList(ao
+				.find(SaveAccess.class,
+						Query.select()
+								.where(TYPE
+										+ " = ? AND ACCESS_ENTITY > ? AND ACCESS_ENTITY < ?",
+										LASTTAG, startDate, endDate)
+								.order("id DESC")));
+	}
+
+	@Override
+	public List<SaveAccess> filterWithStartDate(Long startDate) {
+		return newArrayList(ao.find(
+				SaveAccess.class,
+				Query.select()
+						.where(TYPE + " = ? AND ACCESS_ENTITY > ?", LASTTAG,
+								startDate).order("id DESC")));
+	}
+
+	@Override
+	public List<SaveAccess> filterWithEndDate(Long endDate) {
+		return newArrayList(ao.find(
+				SaveAccess.class,
+				Query.select()
+						.where(TYPE + " = ? AND ACCESS_ENTITY < ?", LASTTAG,
+								endDate).order("id DESC")));
+	}
+
+	@Override
+	public List<SaveAccess> getAccessByFilterWithDate(Long pageId,
+			String userkey, Long startDate, Long endDate) {
+		return newArrayList(ao
+				.find(SaveAccess.class,
+						Query.select()
+								.where("page_id = ? AND user_key = ? AND ACCESS_ENTITY > ? AND ACCESS_ENTITY < ?",
+										pageId, userkey, startDate, endDate)
+								.order("id DESC")));
+	}
+
+	@Override
+	public List<SaveAccess> getAccessByFilterWithStartDate(Long pageId,
+			String userkey, Long startDate) {
+		return newArrayList(ao
+				.find(SaveAccess.class,
+						Query.select()
+								.where("page_id = ? AND user_key = ? AND ACCESS_ENTITY > ?",
+										pageId, userkey, startDate)
+								.order("id DESC")));
+	}
+
+	@Override
+	public List<SaveAccess> getAccessByFilterWithEndDate(Long pageId,
+			String userkey, Long endDate) {
+		return newArrayList(ao
+				.find(SaveAccess.class,
+						Query.select()
+								.where("page_id = ? AND user_key = ? AND ACCESS_ENTITY < ?",
+										pageId, userkey, endDate)
+								.order("id DESC")));
 	}
 
 }

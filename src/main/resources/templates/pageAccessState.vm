@@ -5,36 +5,93 @@
     <meta name="section" content="SaveAccessSection/SaveAccessWebItem"/>
     <meta name="tab" content="SaveAccessWebItem"/>
     $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    #requireResource("com.winagile.statistics.PageAccess:pagination-javascript")
   </head>
   <body>
-    #parse("/templates/pageAccessTable.vm")
-    
-    #pagination($paginationSupport)
-			<div class="pagination">
-    			<ul class="pagination">
-        			#set($pageStart = 1)
-                	#set($pageEnd = $totalPage)
-                	#set($range = [$pageStart..$pageEnd])
-        						
-        			## Previous Page
-        			#if($totalPage>1 && $pageNumber!=1)
-        				<li><a class="pageAccess" href="#" clickedPage="$!pageNumber-1">&lt;&lt; $i18n.getText("PageAccess.pagination.previous")</a></li>
-        			#end
-                		
-        			#foreach ($i in $range)
-        				#if($pageNumber == $i)
-        					<li><strong class="pagination-curr">$i</strong></li>
-        				#else
-        					<li><a class="pageAccess" href="#" clickedPage="$!i">$i</a></li>
-        				#end
-        			#end
-        						
-        			## Next Page
-        			#if($totalPage>1 && $pageNumber!=$totalPage)
-        				#set($nextPage=$pageNumber+1)
-        				<li><a class="spaceAttachmentsPage" href="#" clickedPage="$!nextPage">$i18n.getText("PageAccess.pagination.next") &gt;&gt</a></li>
-    				#end
-            	</ul>	
-    		</div>
+	  
+<div class="pageList">
+  	<div class="attachments-container">
+	  	<form class="aui" action="#">
+		  <div class="field-group">
+			  <label for="fromDate">$i18n.getText("PageAccess.section.select.fromDate"):</label>
+			<input type="date" id="fromdatepicker" class="text medium-field" name="fromdatepicker" value="$!fromDate">
+		</div>
+		
+		<div class="field-group">
+			<label for="toDate">$i18n.getText("PageAccess.section.select.toDate"):</label>
+			<input type="date" id="todatepicker" class="text medium-field" name="todatepicker" value="$!toDate">
+		</div>
+		
+		<div class="field-group">
+			<label for="GroupName">$i18n.getText("PageAccess.section.select.group"):</label>
+			        <select class="select" name="groupName" id="groupName">
+			        	<option></option>
+			        	 #foreach($item in $AllGroups)
+			        	 #if($groupName==$item)
+			        	 <option selected="selected">$item</option>
+			        	 #else
+			            <option>$item</option>
+			            #end
+			            #end
+			        </select>
+		</div>
+		
+		<div class="buttons-container">
+	        <div class="buttons">
+	            <input class="button submit" type="button" value='$i18n.getText("PageAccess.section.select.Search")' id="filter-save-button" name="filter-save-button">
+	        </div>
+	    </div>
+	    <div class="buttons-container">
+	        <div class="buttons">
+	            <a href="#" id="removeFilterLink">$i18n.getText("PageAccess.section.select.removefilter")</a>
+	        </div>
+	    </div>
+		</form>
+	
+		<br />
+		<br />
+		<a href="#SearchResult" id="SearchResult">&nbsp;</a>
+	#if($asResult.size() > 0)
+	    #parse("/templates/pageAccessTable.vm")
+	    
+	    #pagination($paginationSupport)
+				<div class="pagination">
+	    			<ul class="pagination">
+	        			#set($pageStart = 1)
+	                	#set($pageEnd = $totalPage)
+	                	#set($range = [$pageStart..$pageEnd])
+	        						
+	        			## Previous Page
+	        			#if($totalPage>1 && $pageNumber!=1)
+	        				#set($prevPagenum=$pageNumber - 1)
+	        				<li><a class="pageAccess" href="#" clickedPage="$!prevPagenum">&lt;&lt; $i18n.getText("PageAccess.pagination.previous")</a></li>
+	        			#end
+	                		
+	        			#foreach ($i in $range)
+	        				#if($pageNumber == $i)
+	        					<li><strong class="pagination-curr">$i</strong></li>
+	        				#else
+	        					<li><a class="pageAccess" href="#" clickedPage="$!i">$i</a></li>
+	        				#end
+	        			#end
+	        						
+	        			## Next Page
+	        			#if($totalPage>1 && $pageNumber!=$totalPage)
+	        				#set($nextPage=$pageNumber+1)
+	        				<li><a class="pageAccess" href="#" clickedPage="$!nextPage">$i18n.getText("PageAccess.pagination.next") &gt;&gt</a></li>
+	    				#end
+	            	</ul>	
+	    		</div>
+	#else
+	    <div class="space-attachments-error error">$i18n.getText("PageAccess.section.noResultFound")</div>
+	#end
+    </div>
+    <fieldset class="hiddenfieldset hidden">
+		<input type="hidden" class="param" name="groupNameField" value="$!groupName"/>
+        <input type="hidden" class="param" name="totalItem" value="$!totalItem"/>
+		<input type="hidden" class="param" name="fromDate" value="$!fromDate"/>
+		<input type="hidden" class="param" name="toDate" value="$!toDate"/>
+    </fieldset>
+ </div>
   </body>
 </html>

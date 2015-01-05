@@ -1,5 +1,6 @@
 package com.winagile.statistics;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +11,10 @@ import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.sal.api.user.UserKey;
+import com.atlassian.sal.api.user.UserManager;
+import com.atlassian.user.EntityException;
+import com.atlassian.user.Group;
+import com.atlassian.user.GroupManager;
 import com.atlassian.user.User;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.winagile.activeObject.AccessSaveService;
@@ -19,31 +24,92 @@ public class pageAccessUtil {
 	private List<Map<String, String>> realList = new ArrayList<Map<String, String>>();
 	private Map<String, String> pageInfoAccessDate = new HashMap<String, String>();
 	public static int START_INDEX = 0;
-	public static int COUNT_ON_EACH_PAGE = 2;
+	public static int COUNT_ON_EACH_PAGE = 20;
 	private int totalPage;
+	private int totalItem = 0;
+	private String groupName = null;
+	private Long fromDate = null;
+	private Long toDate = null;
+	private List<String> groupList = new ArrayList<String>();
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+	private SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
 	private final AccessSaveService as;
 	private final PageManager pm;
 	private UserAccessor ua;
+	private GroupManager gm;
+	private UserManager um;
 
-	public pageAccessUtil(AccessSaveService as, PageManager pm, UserAccessor ua) {
+	public pageAccessUtil(AccessSaveService as, PageManager pm,
+			UserAccessor ua, GroupManager gm, UserManager um) {
 		this.as = as;
 		this.pm = pm;
 		this.ua = ua;
+		this.gm = gm;
+		this.um = um;
 	}
 
-	public void getAllRealContext() {
+	public void getAllRealContext(int pageNum) {
 		List<SaveAccess> saR = as.filterWithLimit(COUNT_ON_EACH_PAGE,
-				START_INDEX);
+				calculateStartIndex(pageNum, COUNT_ON_EACH_PAGE));
 		System.out.println("saR size:" + saR.size());
 
 		realList = new ArrayList<Map<String, String>>();
 		pageInfoAccessDate = new HashMap<String, String>();
 
 		getRealList(saR);
-		totalPage = calculateTotalPage(as.getCurrentItemsNum(), COUNT_ON_EACH_PAGE);
+
+		if (totalItem == 0) {
+			totalItem = as.getCurrentItemsNum();
+		}
+
+		totalPage = calculateTotalPage(totalItem, COUNT_ON_EACH_PAGE);
+	}
+
+	public void getFilteredRealContext(int pageNum) {
+		if (groupName == null && fromDate == null && toDate == null) {
+			getAllRealContext(pageNum);
+		} else {
+			List<SaveAccess> saR;
+			if (fromDate != null && toDate != null) {
+				saR = as.filterWithDate(fromDate, toDate);
+			} else if (fromDate != null && toDate == null) {
+				saR = as.filterWithStartDate(fromDate);
+			} else if (fromDate == null && toDate != null) {
+				saR = as.filterWithEndDate(toDate);
+			} else {
+				saR = as.all();
+			}
+
+			if (groupName != null) {
+				saR = filterGroup(saR);
+			}
+
+			if (totalItem == 0) {
+				totalItem = saR.size();
+			}
+
+			realList = new ArrayList<Map<String, String>>();
+			pageInfoAccessDate = new HashMap<String, String>();
+
+			totalPage = calculateTotalPage(totalItem, COUNT_ON_EACH_PAGE);
+			int startIndex = calculateStartIndex(pageNum, COUNT_ON_EACH_PAGE);
+			int endindex = startIndex + COUNT_ON_EACH_PAGE > saR.size() ? saR
+					.size() : startIndex + COUNT_ON_EACH_PAGE;
+			getRealList(saR.subList(startIndex, endindex));
+		}
+	}
+
+	private List<SaveAccess> filterGroup(List<SaveAccess> saR) {
+		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
+		if (!saR.isEmpty()) {
+			for (SaveAccess saRI : saR) {
+				if (um.isUserInGroup(new UserKey(saRI.getUserKey()), groupName)) {
+					saRnew.add(saRI);
+				}
+			}
+		}
+		return saRnew;
 	}
 
 	private void getRealList(List<SaveAccess> saR) {
@@ -80,13 +146,24 @@ public class pageAccessUtil {
 					continue;
 				}
 				System.out.println(realList.toString());
-				System.out.println(pageInfoAccessDate.toString());
+				// System.out.println(pageInfoAccessDate.toString());
 			}
 		}
 	}
 
 	private void getAccessTimeList(Long pageId, String userkey) {
-		List<SaveAccess> saRT = as.getAccessByFilter(pageId, userkey);
+		List<SaveAccess> saRT = new ArrayList<SaveAccess>();
+		if (fromDate != null && toDate != null) {
+			saRT = as.getAccessByFilterWithDate(pageId, userkey, fromDate,
+					toDate);
+		} else if (fromDate != null && toDate == null) {
+			saRT = as.getAccessByFilterWithStartDate(pageId, userkey, fromDate);
+		} else if (fromDate == null && toDate != null) {
+			saRT = as.getAccessByFilterWithEndDate(pageId, userkey, toDate);
+		} else {
+			saRT = as.getAccessByFilter(pageId, userkey);
+		}
+
 		if (!saRT.isEmpty()) {
 			StringBuffer extraAccessTimeList = new StringBuffer();
 			for (SaveAccess saRTI : saRT) {
@@ -131,6 +208,67 @@ public class pageAccessUtil {
 
 	public void setTotalPage(int totalPage) {
 		this.totalPage = totalPage;
+	}
+
+	public int getTotalItem() {
+		return totalItem;
+	}
+
+	public void setTotalItem(int totalItem) {
+		this.totalItem = totalItem;
+	}
+
+	public List<String> getGroupList() {
+		try {
+			groupList = new ArrayList<String>();
+			for (Group pg : gm.getGroups()) {
+				groupList.add(pg.getName());
+			}
+		} catch (EntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return groupList;
+	}
+
+	public void setGroupList(List<String> groupList) {
+		this.groupList = groupList;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+	public String getFromDate() {
+		return fromDate == null ? null : sdfDate.format(new Date(fromDate));
+	}
+
+	public void setFromDate(String fromDate) {
+		try {
+			this.fromDate = fromDate == null ? null : sdfDate.parse(fromDate)
+					.getTime();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public String getToDate() {
+		return toDate == null ? null : sdfDate.format(new Date(toDate));
+	}
+
+	public void setToDate(String toDate) {
+		try {
+			this.toDate = toDate == null ? null : sdfDate.parse(toDate)
+					.getTime();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
