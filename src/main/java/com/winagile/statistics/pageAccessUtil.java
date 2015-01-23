@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
+import com.atlassian.confluence.spaces.Space;
+import com.atlassian.confluence.spaces.SpaceManager;
 import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.sal.api.user.UserKey;
 import com.atlassian.sal.api.user.UserManager;
@@ -28,9 +30,15 @@ public class pageAccessUtil {
 	private int totalPage;
 	private int totalItem = 0;
 	private String groupName = null;
+	private String spaceName = null;
+
 	private Long fromDate = null;
 	private Long toDate = null;
 	private List<String> groupList = new ArrayList<String>();
+	private List<String> spaceList = new ArrayList<String>();
+
+	private String pageTitle = null;
+	private UserKey userKey = null;
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
@@ -39,14 +47,16 @@ public class pageAccessUtil {
 	private UserAccessor ua;
 	private GroupManager gm;
 	private UserManager um;
+	private SpaceManager sm;
 
 	public pageAccessUtil(AccessSaveService as, PageManager pm,
-			UserAccessor ua, GroupManager gm, UserManager um) {
+			UserAccessor ua, GroupManager gm, UserManager um, SpaceManager sm) {
 		this.as = as;
 		this.pm = pm;
 		this.ua = ua;
 		this.gm = gm;
 		this.um = um;
+		this.sm = sm;
 	}
 
 	public void getAllRealContext(int pageNum) {
@@ -67,22 +77,34 @@ public class pageAccessUtil {
 	}
 
 	public void getFilteredRealContext(int pageNum) {
-		if (groupName == null && fromDate == null && toDate == null) {
+		if (groupName == null && fromDate == null && toDate == null
+				&& userKey == null && pageTitle == null && spaceName == null) {
 			getAllRealContext(pageNum);
 		} else {
 			List<SaveAccess> saR;
 			if (fromDate != null && toDate != null) {
-				saR = as.filterWithDate(fromDate, toDate);
+				saR = as.filterWithDate(fromDate, toDate,
+						userKey == null ? null : userKey.getStringValue());
 			} else if (fromDate != null && toDate == null) {
-				saR = as.filterWithStartDate(fromDate);
+				saR = as.filterWithStartDate(fromDate, userKey == null ? null
+						: userKey.getStringValue());
 			} else if (fromDate == null && toDate != null) {
-				saR = as.filterWithEndDate(toDate);
+				saR = as.filterWithEndDate(toDate, userKey == null ? null
+						: userKey.getStringValue());
 			} else {
-				saR = as.all();
+				saR = as.all(userKey == null ? null : userKey.getStringValue());
+			}
+
+			if (pageTitle != null) {
+				saR = filterPageTitle(saR);
 			}
 
 			if (groupName != null) {
 				saR = filterGroup(saR);
+			}
+
+			if (spaceName != null) {
+				saR = filterSpace(saR);
 			}
 
 			if (totalItem == 0) {
@@ -100,11 +122,39 @@ public class pageAccessUtil {
 		}
 	}
 
+	private List<SaveAccess> filterPageTitle(List<SaveAccess> saR) {
+		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
+		if (!saR.isEmpty()) {
+			for (SaveAccess saRI : saR) {
+				if (pm.getPage(saRI.getPageId()).getTitle().equals(pageTitle)) {
+					saRnew.add(saRI);
+				}
+			}
+		}
+		return saRnew;
+	}
+
 	private List<SaveAccess> filterGroup(List<SaveAccess> saR) {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
 		if (!saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
 				if (um.isUserInGroup(new UserKey(saRI.getUserKey()), groupName)) {
+					saRnew.add(saRI);
+				}
+			}
+		}
+		return saRnew;
+	}
+
+	private List<SaveAccess> filterSpace(List<SaveAccess> saR) {
+		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
+		if (!saR.isEmpty()) {
+			for (SaveAccess saRI : saR) {
+				if (spaceName.equals(sm.getSpace(
+						sm.getSpaceFromPageId(saRI.getPageId())).getName())) {
+					// System.out.println("target spaceName : " + spaceName);
+					// System.out.println("current spaceName : " + sm.getSpace(
+					// sm.getSpaceFromPageId(saRI.getPageId())).getName());
 					saRnew.add(saRI);
 				}
 			}
@@ -134,6 +184,11 @@ public class pageAccessUtil {
 
 					pageInfo.put("pageTitle", accessPage.getDisplayTitle());
 					pageInfo.put("pageUrl", accessPage.getUrlPath());
+					pageInfo.put(
+							"pageSpace",
+							sm.getSpace(sm.getSpaceFromPageId(saRI.getPageId()))
+									.getDisplayTitle());
+
 					pageInfo.put("accessCount",
 							String.valueOf(as.getAccessCount(saRI.getPageId(),
 									saRI.getUserKey())));
@@ -145,7 +200,7 @@ public class pageAccessUtil {
 				} else {
 					continue;
 				}
-				System.out.println(realList.toString());
+				// System.out.println(realList.toString());
 				// System.out.println(pageInfoAccessDate.toString());
 			}
 		}
@@ -269,6 +324,43 @@ public class pageAccessUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public String getPageTitle() {
+		return pageTitle;
+	}
+
+	public void setPageTitle(String pageTitle) {
+		this.pageTitle = pageTitle;
+	}
+
+	public String getUserKey() {
+		return userKey == null ? null : ua.getUserByKey(userKey).getName();
+	}
+
+	public void setUserKey(String userName) {
+		this.userKey = userName == null ? null : ua.getUserByName(userName)
+				.getKey();
+	}
+
+	public List<String> getSpaceList() {
+		spaceList = new ArrayList<String>();
+		for (Space sitem : sm.getAllSpaces()) {
+			spaceList.add(sitem.getName());
+		}
+		return spaceList;
+	}
+
+	public void setSpaceList(List<String> spaceList) {
+		this.spaceList = spaceList;
+	}
+
+	public String getSpaceName() {
+		return spaceName;
+	}
+
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
 	}
 
 }

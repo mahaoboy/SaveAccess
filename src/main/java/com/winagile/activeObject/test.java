@@ -13,8 +13,8 @@ public class test {
 		SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		now.getTime();
 		System.out.println(String.valueOf(now.getTime()));
-String text = "11";
-if(text.contains("11")){
+String text = "1x1";
+if(text.contains("1x1")){
 	System.out.println("contain");
 }
 		Date date = new Date(now.getTime());

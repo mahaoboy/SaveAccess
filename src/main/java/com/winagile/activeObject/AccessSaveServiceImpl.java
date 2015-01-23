@@ -36,9 +36,19 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 	}
 
 	@Override
-	public List<SaveAccess> all() {
-		return newArrayList(ao.find(SaveAccess.class,
-				Query.select().where(TYPE + " = ?", LASTTAG).order("id DESC")));
+	public List<SaveAccess> all(String userKey) {
+		if (userKey == null) {
+			return newArrayList(ao.find(
+					SaveAccess.class,
+					Query.select().where(TYPE + " = ?", LASTTAG)
+							.order("id DESC")));
+		} else {
+			return newArrayList(ao.find(
+					SaveAccess.class,
+					Query.select()
+							.where(TYPE + " = ?  AND user_key = ?", LASTTAG,
+									userKey).order("id DESC")));
+		}
 	}
 
 	@Override
@@ -82,32 +92,63 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 	}
 
 	@Override
-	public List<SaveAccess> filterWithDate(Long startDate, Long endDate) {
-		return newArrayList(ao
-				.find(SaveAccess.class,
-						Query.select()
-								.where(TYPE
-										+ " = ? AND ACCESS_ENTITY > ? AND ACCESS_ENTITY < ?",
-										LASTTAG, startDate, endDate)
-								.order("id DESC")));
+	public List<SaveAccess> filterWithDate(Long startDate, Long endDate,
+			String userKey) {
+		if (userKey == null) {
+			return newArrayList(ao
+					.find(SaveAccess.class,
+							Query.select()
+									.where(TYPE
+											+ " = ? AND ACCESS_ENTITY > ? AND ACCESS_ENTITY < ?",
+											LASTTAG, startDate, endDate)
+									.order("id DESC")));
+		} else {
+			return newArrayList(ao
+					.find(SaveAccess.class,
+							Query.select()
+									.where(TYPE
+											+ " = ? AND ACCESS_ENTITY > ? AND ACCESS_ENTITY < ? AND USER_KEY = ?",
+											LASTTAG, startDate, endDate,
+											userKey).order("id DESC")));
+		}
 	}
 
 	@Override
-	public List<SaveAccess> filterWithStartDate(Long startDate) {
-		return newArrayList(ao.find(
-				SaveAccess.class,
-				Query.select()
-						.where(TYPE + " = ? AND ACCESS_ENTITY > ?", LASTTAG,
-								startDate).order("id DESC")));
+	public List<SaveAccess> filterWithStartDate(Long startDate, String userKey) {
+		if (userKey == null) {
+			return newArrayList(ao.find(
+					SaveAccess.class,
+					Query.select()
+							.where(TYPE + " = ? AND ACCESS_ENTITY > ?",
+									LASTTAG, startDate).order("id DESC")));
+		} else {
+			return newArrayList(ao
+					.find(SaveAccess.class,
+							Query.select()
+									.where(TYPE
+											+ " = ? AND ACCESS_ENTITY > ? AND USER_KEY = ?",
+											LASTTAG, startDate, userKey)
+									.order("id DESC")));
+		}
 	}
 
 	@Override
-	public List<SaveAccess> filterWithEndDate(Long endDate) {
-		return newArrayList(ao.find(
-				SaveAccess.class,
-				Query.select()
-						.where(TYPE + " = ? AND ACCESS_ENTITY < ?", LASTTAG,
-								endDate).order("id DESC")));
+	public List<SaveAccess> filterWithEndDate(Long endDate, String userKey) {
+		if (userKey == null) {
+			return newArrayList(ao.find(
+					SaveAccess.class,
+					Query.select()
+							.where(TYPE + " = ? AND ACCESS_ENTITY < ?",
+									LASTTAG, endDate).order("id DESC")));
+		} else {
+			return newArrayList(ao
+					.find(SaveAccess.class,
+							Query.select()
+									.where(TYPE
+											+ " = ? AND ACCESS_ENTITY < ? AND USER_KEY = ?",
+											LASTTAG, endDate, userKey)
+									.order("id DESC")));
+		}
 	}
 
 	@Override

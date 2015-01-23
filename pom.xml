@@ -5,10 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.winagile.statistics</groupId>
 	<artifactId>PageAccess</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<organization>
-		<name>Example Company</name>
-		<url>http://www.example.com/</url>
+		<name>Winagile</name>
+		<url>http://www.winagile.com/</url>
 	</organization>
 	<name>PageAccess</name>
 	<description>This is the com.winagile.statistics:PageAccess plugin for Atlassian Confluence.</description>
@@ -127,7 +127,7 @@
 		</plugins>
 	</build>
 	<properties>
-		<confluence.version>5.6.4</confluence.version>
+		<confluence.version>5.6.3</confluence.version>
 		<confluence.data.version>5.6.4</confluence.data.version>
 		<amps.version>5.0.4</amps.version>
 		<plugin.testrunner.version>1.2.0</plugin.testrunner.version>

@@ -2,6 +2,7 @@ package com.winagile.statistics.servlet;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import bucket.core.actions.PaginationSupport;
 
 import com.atlassian.confluence.renderer.radeox.macros.MacroUtils;
+import com.atlassian.confluence.spaces.SpaceManager;
 import com.atlassian.confluence.user.AuthenticatedUserThreadLocal;
 import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.confluence.util.velocity.VelocityUtils;
@@ -33,70 +35,103 @@ public class PageAccessState extends HttpServlet {
 			pageAccessUtil.COUNT_ON_EACH_PAGE);
 	private final LoginUriProvider loginUriProvider;
 	private final UserManager userManager;
+	private final SpaceManager spaceManager;
 
 	public PageAccessState(WebSudoManager webSudoManager,
-			pageAccessUtil pageUtil, LoginUriProvider loginUriProvider, UserManager userManager) {
+			pageAccessUtil pageUtil, LoginUriProvider loginUriProvider,
+			UserManager userManager, SpaceManager spaceManager) {
 		this.webSudoManager = webSudoManager;
 		this.pageUtil = pageUtil;
 		this.loginUriProvider = loginUriProvider;
 		this.userManager = userManager;
+		this.spaceManager = spaceManager;
 	}
 
-	private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		response.sendRedirect(loginUriProvider.getLoginUri(getUri(request)).toASCIIString());
+	private void redirectToLogin(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		response.sendRedirect(loginUriProvider.getLoginUri(getUri(request))
+				.toASCIIString());
 	}
-	
-	private URI getUri(HttpServletRequest request)
-	{
+
+	private URI getUri(HttpServletRequest request) {
 		StringBuffer builder = request.getRequestURL();
-		if (request.getQueryString() != null)
-		{
+		if (request.getQueryString() != null) {
 			builder.append("?");
 			builder.append(request.getQueryString());
 		}
 		return URI.create(builder.toString());
-	} 
-	
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		try {
 			ConfluenceUser loginUser = AuthenticatedUserThreadLocal.get();
-			if (loginUser == null || !userManager.isSystemAdmin(loginUser.getKey())) {
-			    redirectToLogin(req, resp);
-			    return;
+			if (loginUser == null
+					|| !userManager.isSystemAdmin(loginUser.getKey())) {
+				redirectToLogin(req, resp);
+				return;
 			}
 			webSudoManager.willExecuteWebSudoRequest(req);
 			int pageNum, totalItemNum;
-			if (req.getParameterMap().containsKey("pageNumber") && req.getParameter("pageNumber").length() > 0) {
+			if (req.getParameterMap().containsKey("pageNumber")
+					&& req.getParameter("pageNumber").length() > 0) {
 				pageNum = Integer.valueOf(req.getParameter("pageNumber"));
 			} else {
 				pageNum = 1;
 			}
-			if (req.getParameterMap().containsKey("totalItem") && req.getParameter("totalItem").length() > 0) {
+			if (req.getParameterMap().containsKey("totalItem")
+					&& req.getParameter("totalItem").length() > 0) {
 				totalItemNum = Integer.valueOf(req.getParameter("totalItem"));
 				pageUtil.setTotalItem(totalItemNum);
-			}else{
+			} else {
 				pageUtil.setTotalItem(0);
 			}
-			
-			if (req.getParameterMap().containsKey("groupNameField") && req.getParameter("groupNameField").length() > 0) {
+
+			if (req.getParameterMap().containsKey("groupNameField")
+					&& req.getParameter("groupNameField").length() > 0) {
 				pageUtil.setGroupName(req.getParameter("groupNameField"));
-			}else{
+			} else {
 				pageUtil.setGroupName(null);
 			}
-			if (req.getParameterMap().containsKey("fromDate") && req.getParameter("fromDate").length() > 0) {
-				System.out.println("req.getParameter(fromDate).length() : " + req.getParameter("fromDate").length());
+
+			if (req.getParameterMap().containsKey("spaceNameField")
+					&& req.getParameter("spaceNameField").length() > 0) {
+				// System.out.println("input spaceName : " +
+				// req.getParameter("spaceNameField"));
+				pageUtil.setSpaceName(URLDecoder.decode(
+						req.getParameter("spaceNameField"), "UTF-8"));
+			} else {
+				pageUtil.setSpaceName(null);
+			}
+			if (req.getParameterMap().containsKey("fromDate")
+					&& req.getParameter("fromDate").length() > 0) {
+				System.out.println("req.getParameter(fromDate).length() : "
+						+ req.getParameter("fromDate").length());
 				pageUtil.setFromDate(req.getParameter("fromDate"));
-			}else{
+			} else {
 				pageUtil.setFromDate(null);
 			}
-			if (req.getParameterMap().containsKey("toDate") && req.getParameter("toDate").length() > 0) {
+			if (req.getParameterMap().containsKey("toDate")
+					&& req.getParameter("toDate").length() > 0) {
 				pageUtil.setToDate(req.getParameter("toDate"));
-			}else{
+			} else {
 				pageUtil.setToDate(null);
 			}
+			if (req.getParameterMap().containsKey("userNameField")
+					&& req.getParameter("userNameField").length() > 0) {
+				pageUtil.setUserKey(req.getParameter("userNameField"));
+			} else {
+				pageUtil.setUserKey(null);
+			}
+			if (req.getParameterMap().containsKey("pageTitleField")
+					&& req.getParameter("pageTitleField").length() > 0) {
+				pageUtil.setPageTitle(URLDecoder.decode(
+						req.getParameter("pageTitleField"), "UTF-8"));
+			} else {
+				pageUtil.setPageTitle(null);
+			}
+
 			pageUtil.getFilteredRealContext(pageNum);
 
 			Map<String, Object> context = MacroUtils.defaultVelocityContext();
@@ -109,10 +144,14 @@ public class PageAccessState extends HttpServlet {
 			context.put("paginationSupport", paginationSupport);
 
 			context.put("groupName", pageUtil.getGroupName());
+			context.put("spaceName", pageUtil.getSpaceName());
 			context.put("fromDate", pageUtil.getFromDate());
 			context.put("toDate", pageUtil.getToDate());
+			context.put("userName", pageUtil.getUserKey());
+			context.put("pageTitle", pageUtil.getPageTitle());
 
 			context.put("AllGroups", pageUtil.getGroupList());
+			context.put("AllSpaces", pageUtil.getSpaceList());
 
 			resp.setContentType("text/html");
 			resp.getWriter().write(

@@ -9,7 +9,7 @@ public interface AccessSaveService {
 
 	SaveAccess add(Long pageId, String userkey);
 
-	List<SaveAccess> all();
+	List<SaveAccess> all(String userKey);
 
 	int getAccessCount(Long pageId, String userkey);
 
@@ -25,9 +25,9 @@ public interface AccessSaveService {
 
 	List<SaveAccess> filterWithLimit(int start, int end);
 	
-	List<SaveAccess> filterWithDate(Long startDate, Long endDate);
+	List<SaveAccess> filterWithDate(Long startDate, Long endDate, String userKey);
 	
-	List<SaveAccess> filterWithStartDate(Long startDate);
+	List<SaveAccess> filterWithStartDate(Long startDate, String userKey);
 	
-	List<SaveAccess> filterWithEndDate(Long endDate);
+	List<SaveAccess> filterWithEndDate(Long endDate, String userKey);
 }

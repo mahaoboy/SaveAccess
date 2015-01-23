@@ -10,12 +10,15 @@
   <body>
 	  
 <div class="pageList">
-  	<div class="attachments-container">
-	  	<form class="aui" action="#">
+
+<form class="aui" action="#">
 		  <div class="field-group">
 			  <label for="fromDate">$i18n.getText("PageAccess.section.select.fromDate"):</label>
 			<input type="date" id="fromdatepicker" class="text medium-field" name="fromdatepicker" value="$!fromDate">
 		</div>
+		
+		
+		
 		
 		<div class="field-group">
 			<label for="toDate">$i18n.getText("PageAccess.section.select.toDate"):</label>
@@ -36,6 +39,32 @@
 			        </select>
 		</div>
 		
+		<div class="field-group">
+			<label for="SpaceName">$i18n.getText("PageAccess.section.select.space"):</label>
+			        <select class="select" name="spaceName" id="spaceName">
+			        	<option></option>
+			        	 #foreach($item in $AllSpaces)
+			        	 #if($spaceName==$item)
+			        	 <option selected="selected">$item</option>
+			        	 #else
+			            <option>$item</option>
+			            #end
+			            #end
+			        </select>
+		</div>
+		
+		<div class="field-group">
+			<label for="fromDate">$i18n.getText("PageAccess.section.select.username"):</label>
+			<input id="userNameField" name="userNameField" value="$!userName" class="text medium-field autocomplete-user" data-none-message="No users found" data-template="{username}">
+		</div>
+		
+		
+		<div class="field-group">
+			<label for="fromDate">$i18n.getText("PageAccess.section.select.pagetitle"):</label>
+			<input id="pageTitleField" name="pageTitleField" class="text long-field autocomplete-page" data-max="10" data-none-message="No results" data-template="{title}" value="$!pageTitle">
+		</div>
+		
+		
 		<div class="buttons-container">
 	        <div class="buttons">
 	            <input class="button submit" type="button" value='$i18n.getText("PageAccess.section.select.Search")' id="filter-save-button" name="filter-save-button">
@@ -51,6 +80,8 @@
 		<br />
 		<br />
 		<a href="#SearchResult" id="SearchResult">&nbsp;</a>
+  	<div class="attachments-container">
+	  	
 	#if($asResult.size() > 0)
 	    #parse("/templates/pageAccessTable.vm")
 	    
@@ -87,7 +118,10 @@
 	#end
     </div>
     <fieldset class="hiddenfieldset hidden">
+    	<input type="hidden" class="param" name="pageTitleField" value="$!pageTitle"/>
+    	<input type="hidden" class="param" name="userNameField" value="$!userName"/>
 		<input type="hidden" class="param" name="groupNameField" value="$!groupName"/>
+		<input type="hidden" class="param" name="spaceNameField" value="$!spaceName"/>
         <input type="hidden" class="param" name="totalItem" value="$!totalItem"/>
 		<input type="hidden" class="param" name="fromDate" value="$!fromDate"/>
 		<input type="hidden" class="param" name="toDate" value="$!toDate"/>
