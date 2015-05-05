@@ -38,7 +38,6 @@
 		<resource name="PageAccess.js" type="download" location="/js/PageAccess.js" />
 		<context>atl.general</context>
 	</web-resource>
-
 	<web-resource key="pagination-javascript" name="pagination JavaScript">
 		<transformation extension="js">
 			<transformer key="jsI18n" />
@@ -47,18 +46,15 @@
 		<dependency>confluence.web.resources:ajs</dependency>
 		<dependency>com.atlassian.auiplugin:aui-date-picker</dependency>
 	</web-resource>
-
 	<ao key="ao-module">
 		<description>The module configuring the Active Objects service used by
-			this plugin
-		</description>
+			this plugin</description>
 		<entity>com.winagile.activeObject.SaveAccess</entity>
 	</ao>
 	<component-import key="ao" name="Active Objects service"
 		interface="com.atlassian.activeobjects.external.ActiveObjects">
 		<description>Component to access Active Objects functionality from the
-			plugin
-		</description>
+			plugin</description>
 	</component-import>
 	<component key="tx-processor" name="Transactional Annotation Processor"
 		class="com.atlassian.activeobjects.external.TransactionalAnnotationProcessor">
@@ -69,7 +65,6 @@
 		public="true">
 		<interface>com.winagile.activeObject.AccessSaveService</interface>
 	</component>
-
 	<web-section key="SaveAccessSection" name="SaveAccessSection Section"
 		location="system.admin" weight="110">
 		<label key="PageAccess.section.name" />
@@ -83,21 +78,31 @@
 		<condition
 			class="com.atlassian.confluence.plugin.descriptor.web.conditions.SystemAdministratorCondition" />
 	</web-item>
-
 	<servlet name="Page Access State" i18n-name-key="page-access-state.name"
 		key="page-access-state" class="com.winagile.statistics.servlet.PageAccessState">
 		<description key="page-access-state.description">The Page Access State Plugin
 		</description>
 		<url-pattern>/winagile/pageaccessstate</url-pattern>
 	</servlet>
-
 	<component-import key="webSudoManager"
 		interface="com.atlassian.sal.api.websudo.WebSudoManager" />
-
 	<component key="myPageAccessUtl" class="com.winagile.statistics.pageAccessUtil" />
-
 	<component-import key="userManager"
 		interface="com.atlassian.sal.api.user.UserManager" filter="" />
 	<component-import key="loginUriProvider"
 		interface="com.atlassian.sal.api.auth.LoginUriProvider" filter="" />
+	<servlet-filter name="page Access Time Track"
+		i18n-name-key="page-access-time-track.name" key="page-access-time-track"
+		class="com.winagile.statistics.servlet.filter.pageAccessTimeTrack"
+		location="before-dispatch" weight="200">
+		<description key="page-access-time-track.description">The page Access Time Track Plugin
+		</description>
+		<url-pattern>/display/*</url-pattern>
+		<url-pattern>/pages/*</url-pattern>
+		<init-param>
+			<param-name>header</param-name>
+			<param-value>Request-Time</param-value>
+		</init-param>
+		<dispatcher>REQUEST</dispatcher>
+	</servlet-filter>
 </atlassian-plugin>

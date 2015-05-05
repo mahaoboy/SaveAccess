@@ -126,7 +126,7 @@ public class pageAccessUtil {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
 		if (!saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
-				if (pm.getPage(saRI.getPageId()).getTitle().equals(pageTitle)) {
+				if (pm.getPage(saRI.getPageId()) != null && pm.getPage(saRI.getPageId()).getTitle().equals(pageTitle)) {
 					saRnew.add(saRI);
 				}
 			}
@@ -150,7 +150,7 @@ public class pageAccessUtil {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
 		if (!saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
-				if (spaceName.equals(sm.getSpace(
+				if (sm.getSpaceFromPageId(saRI.getPageId()) != null &&spaceName.equals(sm.getSpace(
 						sm.getSpaceFromPageId(saRI.getPageId())).getName())) {
 					// System.out.println("target spaceName : " + spaceName);
 					// System.out.println("current spaceName : " + sm.getSpace(
@@ -224,6 +224,9 @@ public class pageAccessUtil {
 			for (SaveAccess saRTI : saRT) {
 				extraAccessTimeList.append(sdf.format(new Date(saRTI
 						.getAccessEntity())));
+				extraAccessTimeList.append(" / ");
+				extraAccessTimeList.append(saRTI.getRespTime());
+				extraAccessTimeList.append("ms");
 				extraAccessTimeList.append("<br />");
 			}
 			pageInfoAccessDate.put(pageId.toString() + userkey,

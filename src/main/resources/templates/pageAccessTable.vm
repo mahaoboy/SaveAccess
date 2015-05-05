@@ -19,7 +19,7 @@
           	#set($userGroupsWithHtml = $item.get("userGroups"))
           	<td>$userGroupsWithHtml</td>
           	#set($uniqueKeyWithHtml = $accessDate.get($item.get("uniqueKey")))
-          	<td>$uniqueKeyWithHtml</td>
+          	<td><div style="max-height: 100px;overflow-y: auto;">$uniqueKeyWithHtml</div></td>
           </tr>
 		#end
     </table>

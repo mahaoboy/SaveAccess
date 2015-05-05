@@ -40,12 +40,14 @@ public class AddInfo {
 	}
 
 	private String addAccessInfo(String pageId) {
-
+		final String[] splittedStr = pageId.split("-");
+		final String pageIds = splittedStr[0];
+		final String respTime = splittedStr[1] != null ? splittedStr[1] : "";
 		if (AuthenticatedUserThreadLocal.get() != null
-				&& pm.getPage(Long.parseLong(pageId)) != null) {
-			if (accessSaveService.add(Long.parseLong(pageId),
+				&& pm.getPage(Long.parseLong(pageIds)) != null) {
+			if (accessSaveService.add(Long.parseLong(pageIds),
 					AuthenticatedUserThreadLocal.get().getKey()
-							.getStringValue()) != null) {
+							.getStringValue(), respTime) != null) {
 				return SUCC;
 			} else {
 				return FAIL;

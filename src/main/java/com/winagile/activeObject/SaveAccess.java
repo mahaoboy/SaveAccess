@@ -20,4 +20,8 @@ public interface SaveAccess extends Entity {
 	String getType();
 
 	void setType(String type);
+	
+	String getRespTime();
+
+	void setRespTime(String respTime);
 }

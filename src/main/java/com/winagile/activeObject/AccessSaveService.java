@@ -7,7 +7,7 @@ import com.atlassian.activeobjects.tx.Transactional;
 @Transactional
 public interface AccessSaveService {
 
-	SaveAccess add(Long pageId, String userkey);
+	SaveAccess add(Long pageId, String userkey, String respTime);
 
 	List<SaveAccess> all(String userKey);
 
