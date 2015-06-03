@@ -94,7 +94,7 @@
 	<servlet-filter name="page Access Time Track"
 		i18n-name-key="page-access-time-track.name" key="page-access-time-track"
 		class="com.winagile.statistics.servlet.filter.pageAccessTimeTrack"
-		location="before-dispatch" weight="200">
+		location="after-encoding">
 		<description key="page-access-time-track.description">The page Access Time Track Plugin
 		</description>
 		<url-pattern>/display/*</url-pattern>

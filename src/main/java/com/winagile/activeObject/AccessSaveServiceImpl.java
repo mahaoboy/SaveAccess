@@ -29,12 +29,13 @@ public class AccessSaveServiceImpl implements AccessSaveService {
 	@Override
 	public SaveAccess add(Long pageId, String userkey, String respTime) {
 		final SaveAccess saSCount = ao.create(SaveAccess.class);
-		Long now = new Date().getTime();
+		Date now = new Date();
 		setLastTagToOther(pageId, userkey);
 
 		saSCount.setPageId(pageId);
 		saSCount.setUserKey(userkey);
-		saSCount.setAccessEntity(now);
+		saSCount.setAccessEntity(now.getTime());
+		saSCount.setAccessTime(now.toString());
 		saSCount.setRespTime(respTime);
 		saSCount.setType(LASTTAG);
 		saSCount.save();

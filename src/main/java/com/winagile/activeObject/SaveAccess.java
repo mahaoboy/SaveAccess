@@ -16,11 +16,15 @@ public interface SaveAccess extends Entity {
 	Long getAccessEntity();
 
 	void setAccessEntity(Long accessEntity);
-	
+
+	String getAccessTime();
+
+	void setAccessTime(String accessTime);
+
 	String getType();
 
 	void setType(String type);
-	
+
 	String getRespTime();
 
 	void setRespTime(String respTime);

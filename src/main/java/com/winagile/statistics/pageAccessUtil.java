@@ -124,9 +124,11 @@ public class pageAccessUtil {
 
 	private List<SaveAccess> filterPageTitle(List<SaveAccess> saR) {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
-		if (!saR.isEmpty()) {
+		if (saR != null && !saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
-				if (pm.getPage(saRI.getPageId()) != null && pm.getPage(saRI.getPageId()).getTitle().equals(pageTitle)) {
+				if (pm.getPage(saRI.getPageId()) != null
+						&& pm.getPage(saRI.getPageId()).getTitle()
+								.equals(pageTitle)) {
 					saRnew.add(saRI);
 				}
 			}
@@ -136,9 +138,11 @@ public class pageAccessUtil {
 
 	private List<SaveAccess> filterGroup(List<SaveAccess> saR) {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
-		if (!saR.isEmpty()) {
+		if (saR != null && !saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
-				if (um.isUserInGroup(new UserKey(saRI.getUserKey()), groupName)) {
+				if (new UserKey(saRI.getUserKey()) != null
+						&& um.isUserInGroup(new UserKey(saRI.getUserKey()),
+								groupName)) {
 					saRnew.add(saRI);
 				}
 			}
@@ -148,10 +152,13 @@ public class pageAccessUtil {
 
 	private List<SaveAccess> filterSpace(List<SaveAccess> saR) {
 		List<SaveAccess> saRnew = new ArrayList<SaveAccess>();
-		if (!saR.isEmpty()) {
+		if (saR != null && !saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
-				if (sm.getSpaceFromPageId(saRI.getPageId()) != null &&spaceName.equals(sm.getSpace(
-						sm.getSpaceFromPageId(saRI.getPageId())).getName())) {
+				if (sm.getSpaceFromPageId(saRI.getPageId()) != null
+						&& sm.getSpace(sm.getSpaceFromPageId(saRI.getPageId())) != null
+						&& spaceName.equals(sm.getSpace(
+								sm.getSpaceFromPageId(saRI.getPageId()))
+								.getName())) {
 					// System.out.println("target spaceName : " + spaceName);
 					// System.out.println("current spaceName : " + sm.getSpace(
 					// sm.getSpaceFromPageId(saRI.getPageId())).getName());
@@ -163,7 +170,7 @@ public class pageAccessUtil {
 	}
 
 	private void getRealList(List<SaveAccess> saR) {
-		if (!saR.isEmpty()) {
+		if (saR != null && !saR.isEmpty()) {
 			for (SaveAccess saRI : saR) {
 				Map<String, String> pageInfo = new HashMap<String, String>();
 				Page accessPage = pm.getPage(saRI.getPageId());
@@ -219,7 +226,7 @@ public class pageAccessUtil {
 			saRT = as.getAccessByFilter(pageId, userkey);
 		}
 
-		if (!saRT.isEmpty()) {
+		if (saRT != null && !saRT.isEmpty()) {
 			StringBuffer extraAccessTimeList = new StringBuffer();
 			for (SaveAccess saRTI : saRT) {
 				extraAccessTimeList.append(sdf.format(new Date(saRTI
